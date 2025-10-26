@@ -1,27 +1,41 @@
 package ru.itmo.telecom.tariff.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.itmo.telecom.tariff.entity.ServiceParameter;
-import ru.itmo.telecom.tariff.repository.ServiceParameterRepository;
+import jakarta.validation.Valid; // Важно для валидации
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import ru.itmo.telecom.tariff.service.ServiceParameterService;
+import ru.itmo.telecom.shared.tariff.dto.ServiceParameterDto;
+import ru.itmo.telecom.shared.tariff.dto.ServiceParameterCreateRequest;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/parameters") // Относительный путь: /api/v1/tariffs/parameters
+@RequiredArgsConstructor // Используем Lombok для конструктора
 public class ServiceParameterController {
 
-    private final ServiceParameterRepository repository;
+    // 1. Используем Service, а не Repository
+    private final ServiceParameterService service;
 
-    @Autowired
-    public ServiceParameterController(ServiceParameterRepository repository) {
-        this.repository = repository;
+    /**
+     * Получает все параметры услуг (возвращает DTO)
+     */
+    @GetMapping
+    public List<ServiceParameterDto> getAllParameters() {
+        // 2. Вызываем метод сервиса
+        return service.findAllParameters();
     }
 
-    @GetMapping
-    public List<ServiceParameter> getAllParameters() {
-        return repository.findAll();
+    /**
+     * Создает новый параметр услуги
+     */
+    @PostMapping // 3. Обрабатываем POST-запросы
+    @ResponseStatus(HttpStatus.CREATED)
+    public ServiceParameterDto createParameter(
+            @Valid @RequestBody ServiceParameterCreateRequest createRequest) {
+
+        // 4. Вызываем метод сервиса для создания
+        return service.createParameter(createRequest);
     }
 }
