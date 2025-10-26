@@ -1,0 +1,24 @@
+server:
+  port: 8081 # Порт для Tariff Module
+  servlet:
+    context-path: /api/v1/tariffs # Опциональный префикс API
+
+spring:
+  # Настройки подключения к PostgreSQL (тот же, что и для User Module)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/telecom_db
+    username: telecom_user
+    password: telecom_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create # Автоматически создаем таблицы для тарифов
+    show-sql: true
+    properties:
+      hibernate:
+        # Режим отображения SQL: 'org.hibernate.orm.jdbc.bind' для вывода параметров
+        format_sql: true
+        # Стратегия именования таблиц и колонок: стандартная для Spring Boot
+        naming:
+          physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
