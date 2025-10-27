@@ -29,5 +29,6 @@
         <module>shared-module</module>
         <module>user-service-module</module>
         <module>tariff-module</module>
+        <module>order-service-module</module>
     </modules>
 </project>

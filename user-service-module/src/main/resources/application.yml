@@ -1,7 +1,7 @@
 spring:
   # Настройки подключения к БД
   datasource:
-    url: jdbc:postgresql://localhost:5432/telecom_db
+    url: jdbc:postgresql://localhost:5433/telecom_db
     username: telecom_user
     password: telecom_pass
     driver-class-name: org.postgresql.Driver

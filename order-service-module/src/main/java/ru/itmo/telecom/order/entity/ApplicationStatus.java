@@ -1,13 +1,11 @@
-package ru.itmo.telecom.tariff.entity;
+package ru.itmo.telecom.order.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.CascadeType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -15,23 +13,21 @@ import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
-import java.util.List;
 
-// 7. Таблица тарифов
 @Entity
-@Table
+@Table(name = "application_statuses")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Tariff {
+public class ApplicationStatus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(length = 100, nullable = false, unique = true)
-    private String name; // Название тарифа
+    @Column(length = 50, nullable = false, unique = true)
+    private String name; // Например, "СОЗДАНА", "В РАБОТЕ", "ВЫПОЛНЕНА"
 
     @Column(length = 250)
     private String description;
@@ -42,7 +38,4 @@ public class Tariff {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
-
-    @OneToMany(mappedBy = "tariff", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TariffDetail> details;
 }

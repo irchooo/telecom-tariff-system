@@ -1,0 +1,23 @@
+server:
+  port: 8082 # Порт для Order Module
+  servlet:
+    context-path: /api/v1/orders # Префикс API
+
+spring:
+  # Подключаемся к той же самой БД
+  datasource:
+    url: jdbc:postgresql://localhost:5433/telecom_db
+    username: telecom_user
+    password: telecom_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create # Автоматически создаем таблицы заказов
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        # Используем ту же стратегию именования, что и в tariff-module
+        naming:
+          physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
