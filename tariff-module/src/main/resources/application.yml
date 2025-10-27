@@ -6,7 +6,7 @@ server:
 spring:
   # Настройки подключения к PostgreSQL (тот же, что и для User Module)
   datasource:
-    url: jdbc:postgresql://localhost:5432/telecom_db
+    url: jdbc:postgresql://localhost:5433/telecom_db
     username: telecom_user
     password: telecom_pass
     driver-class-name: org.postgresql.Driver

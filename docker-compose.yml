@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: telecom_db
     ports:
       # Пробрасываем порт 5432 контейнера на 5432 хоста
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       # Сохраняем данные БД между перезапусками
       - postgres-data:/var/lib/postgresql/data
