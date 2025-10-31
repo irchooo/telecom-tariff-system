@@ -30,5 +30,6 @@
         <module>user-service-module</module>
         <module>tariff-module</module>
         <module>order-service-module</module>
+        <module>notification-service-module</module>
     </modules>
 </project>
