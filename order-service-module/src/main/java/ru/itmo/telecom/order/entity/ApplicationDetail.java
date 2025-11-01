@@ -25,11 +25,6 @@ public class ApplicationDetail {
     @JoinColumn(name = "application_id", nullable = false)
     private Application application;
 
-    // Ссылка на параметр услуги (из tariff-module, храним ID)
-    // УДАЛИТЕ это поле - оно уже есть в составном ключе!
-    // @Column(name = "parameter_id", nullable = false)
-    // private Integer parameterId;
-
     @Column(nullable = false)
     private Integer volume; // Количество единиц услуги
 

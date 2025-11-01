@@ -1,6 +1,8 @@
 package ru.itmo.telecom.order.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import ru.itmo.telecom.shared.utils.TelecomConstants;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -172,16 +175,38 @@ public class ApplicationService {
 
     @Transactional(readOnly = true)
     public List<ApplicationDto> getApplicationsByClientId(Integer clientId) {
-        List<Application> applications = applicationRepository.findAll().stream()
-                .filter(app -> app.getClientId().equals(clientId))
+        List<Application> applications = applicationRepository.findAllByClientId(clientId);
+
+        // Маппим и вручную устанавливаем детали для кастомных заявок
+        return applications.stream()
+                .map(this::enhanceApplicationWithDetails)
                 .collect(Collectors.toList());
-        return applicationMapper.toDto(applications);
     }
 
     @Transactional(readOnly = true)
     public ApplicationDto getApplicationById(Integer id) {
-        Application application = applicationRepository.findById(id)
+        Application application = applicationRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Заявка", id));
-        return applicationMapper.toDto(application);
+
+        return enhanceApplicationWithDetails(application);
     }
+
+    /**
+     * Дополняет ApplicationDto деталями заявки
+     */
+    private ApplicationDto enhanceApplicationWithDetails(Application application) {
+        ApplicationDto dto = applicationMapper.toDto(application);
+
+        // Если это кастомная заявка - загружаем детали вручную
+        if (application.getCustomApplication() != null) {
+            List<ApplicationDetail> details = applicationDetailRepository
+                    .findAll().stream()
+                    .filter(detail -> detail.getId().getApplicationId().equals(application.getId()))
+                    .collect(Collectors.toList());
+            dto.setDetails(applicationDetailMapper.toDto(details));
+        }
+
+        return dto;
+    }
+
 }

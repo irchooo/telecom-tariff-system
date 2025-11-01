@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Table(name = "custom_applications")
 @Getter
@@ -14,7 +16,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CustomApplication {
 
-    // ID - это одновременно первичный ключ и внешний ключ к applications
     @Id
     private Integer id;
 
@@ -24,7 +25,16 @@ public class CustomApplication {
     @JoinColumn(name = "application_id")
     private Application application;
 
-    // Здесь можно добавить дополнительные поля, специфичные для конструктора,
-    // например, итоговая скидка по промокоду или тип конструктора.
-    // Пока оставим пустым.
+    // ИСПРАВЛЕННАЯ связь с деталями заявки
+    // ApplicationDetail ссылается на Application, а не на CustomApplication
+    // Поэтому мы не можем использовать mappedBy здесь
+    // Вместо этого создадим отдельный запрос для получения деталей
+    @Transient // Помечаем как transient, чтобы Hibernate не пытался маппить это поле
+    private List<ApplicationDetail> applicationDetails;
+
+    // Конструктор без details для обратной совместимости
+    public CustomApplication(Integer id, Application application) {
+        this.id = id;
+        this.application = application;
+    }
 }

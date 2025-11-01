@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ApplicationDetailMapper {
 
-    @Mapping(target = "parameterId", source = "id.parameterId") // Берем из составного ключа
+    @Mapping(target = "parameterId", source = "id.parameterId")
     ApplicationDetailDto toDto(ApplicationDetail detail);
 
     List<ApplicationDetailDto> toDto(List<ApplicationDetail> details);

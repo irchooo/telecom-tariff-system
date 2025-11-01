@@ -22,4 +22,6 @@ spring:
 logging:
   level:
     ru.itmo.telecom: DEBUG
-    org.telegram: WARN
+    org.telegram: DEBUG
+    org.springframework.web.client: DEBUG
+    org.hibernate: ERROR

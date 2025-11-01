@@ -136,18 +136,27 @@ public class BotService {
             registrationDto.setLastName(session.getLastName());
             registrationDto.setPhoneNumber(session.getPhoneNumber());
 
+            // Добавляем логирование
+            log.debug("Attempting to register user: {}", registrationDto);
+
             String url = USER_SERVICE_URL + "/register";
+            log.debug("Calling user service: {}", url);
+
             ResponseEntity<ClientDto> response = restTemplate.postForEntity(url, registrationDto, ClientDto.class);
+
+            log.debug("Registration response: Status {}, Body {}", response.getStatusCode(), response.getBody());
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 userSessions.remove(chatId); // Очищаем сессию
-                return "Вы успешно зарегистрированы!\n\nДоступные команды:\n/tariffs - Готовые тарифы\n/constructor - Создать свой тариф\n/cancel - Отмена текущего действия";
+                return "Вы успешно зарегистрированы!\\n\\nДоступные команды:\\n/tariffs - Готовые тарифы\\n/constructor - Создать свой тариф\\n/cancel - Отмена текущего действия";
+            } else {
+                log.warn("Registration failed with status: {}", response.getStatusCode());
+                return "Ошибка при регистрации. Сервер вернул статус: " + response.getStatusCode();
             }
         } catch (Exception e) {
-            log.error("Registration error", e);
+            log.error("Registration error for chatId: {}", chatId, e);
+            return "Ошибка при регистрации. Пожалуйста, попробуйте позже. Ошибка: " + e.getMessage();
         }
-
-        return "Ошибка при регистрации. Пожалуйста, попробуйте позже.";
     }
 
     private String handleConstructor(Long chatId, String message, UserSession session) {
