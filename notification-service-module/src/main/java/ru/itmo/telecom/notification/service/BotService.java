@@ -13,10 +13,7 @@ import ru.itmo.telecom.shared.user.dto.ClientDto;
 import ru.itmo.telecom.shared.user.dto.ClientRegistrationDto;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -196,26 +193,46 @@ public class BotService {
 
     private String completeCustomTariff(Long chatId, UserSession session) {
         try {
-            // Получаем ID параметров услуг
+            log.debug("Starting custom tariff creation for chatId: {}", chatId);
+
+            try {
+                String parametersUrl = TARIFF_SERVICE_URL + "/parameters";
+                ResponseEntity<ServiceParameterDto[]> paramsResponse =
+                        restTemplate.getForEntity(parametersUrl, ServiceParameterDto[].class);
+                log.debug("Available parameters: {}", Arrays.toString(paramsResponse.getBody()));
+            } catch (Exception e) {
+                log.warn("Could not fetch parameters: {}", e.getMessage());
+            }
+
+            // Получаем ID параметров услуг - ВАЖНО: эти ID должны существовать в БД
             Integer internetParamId = 1; // ID для интернета
-            Integer minutesParamId = 2;  // ID для минут
-            Integer smsParamId = 3;      // ID для SMS
+            Integer minutesParamId = 2; // ID для минут
+            Integer smsParamId = 3; // ID для SMS
+
+            log.debug("Using parameter IDs - Internet: {}, Minutes: {}, SMS: {}",
+                    internetParamId, minutesParamId, smsParamId);
 
             List<ApplicationDetailRequest> details = new ArrayList<>();
 
             if (session.getInternetGb() > 0) {
                 details.add(new ApplicationDetailRequest(internetParamId, session.getInternetGb()));
+                log.debug("Added internet: {}GB", session.getInternetGb());
             }
             if (session.getMinutes() > 0) {
                 details.add(new ApplicationDetailRequest(minutesParamId, session.getMinutes()));
+                log.debug("Added minutes: {}", session.getMinutes());
             }
             if (session.getSms() > 0) {
                 details.add(new ApplicationDetailRequest(smsParamId, session.getSms()));
+                log.debug("Added SMS: {}", session.getSms());
             }
 
             // Получаем ID клиента
             Integer clientId = getClientIdByTelegramId(chatId);
+            log.debug("Retrieved client ID: {} for telegram ID: {}", clientId, chatId);
+
             if (clientId == null) {
+                log.warn("Client not found for telegram ID: {}", chatId);
                 return "Сначала зарегистрируйтесь с помощью команды /start";
             }
 
@@ -223,22 +240,34 @@ public class BotService {
             createRequest.setClientId(clientId);
             createRequest.setDetails(details);
 
+            log.debug("Creating application request: {}", createRequest);
+
             String url = ORDER_SERVICE_URL + "/applications";
+            log.debug("Calling order service: {}", url);
+
             ResponseEntity<ApplicationDto> response = restTemplate.postForEntity(url, createRequest, ApplicationDto.class);
+
+            log.debug("Order service response: Status {}, Body {}", response.getStatusCode(), response.getBody());
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 ApplicationDto application = response.getBody();
                 userSessions.remove(chatId);
 
-                return String.format("✅ Ваш тариф: %dГБ + %d минут + %d SMS\n\n💰 Стоимость: %.2f руб/мес\n\n📋 Заявка №%d создана!\n\nНаш менеджер свяжется с вами в течение 24 часов для подтверждения заказа.",
+                String successMessage = String.format(
+                        "✅ Ваш тариф: %dГБ + %d минут + %d SMS\\n\\n💰 Стоимость: %.2f руб/мес\\n\\n📋 Заявка №%d создана!\\n\\nНаш менеджер свяжется с вами в течение 24 часов для подтверждения заказа.",
                         session.getInternetGb(), session.getMinutes(), session.getSms(),
-                        application.getTotalCost(), application.getId());
+                        application.getTotalCost(), application.getId()
+                );
+                log.info("Custom tariff created successfully: {}", successMessage);
+                return successMessage;
+            } else {
+                log.warn("Order service returned non-2xx status: {}", response.getStatusCode());
+                return "Ошибка при создании тарифа. Сервер вернул статус: " + response.getStatusCode();
             }
         } catch (Exception e) {
-            log.error("Error creating custom tariff", e);
+            log.error("Error creating custom tariff for chatId: {}", chatId, e);
+            return "Ошибка при создании тарифа. Пожалуйста, попробуйте позже. Ошибка: " + e.getMessage();
         }
-
-        return "Ошибка при создании тарифа. Пожалуйста, попробуйте позже.";
     }
 
     private String getAvailableTariffs() {

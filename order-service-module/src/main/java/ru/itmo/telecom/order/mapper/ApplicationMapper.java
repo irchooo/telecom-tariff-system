@@ -11,7 +11,6 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {ApplicationDetailMapper.class, ApplicationStatusMapper.class})
 public interface ApplicationMapper {
 
-    // УБИРАЕМ автоматический маппинг details, так как он больше не работает
     @Mapping(target = "tariffId", source = "tariffApplication.tariffId")
     @Mapping(target = "details", ignore = true) // Будем устанавливать вручную в сервисе
     @Mapping(target = "status", source = "status")
@@ -20,14 +19,13 @@ public interface ApplicationMapper {
 
     List<ApplicationDto> toDto(List<Application> applications);
 
-    // Остальные методы без изменений
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "status", ignore = true)
-    @Mapping(target = "totalCost", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "customApplication", ignore = true)
-    @Mapping(target = "tariffApplication", ignore = true)
-    Application toEntity(ApplicationCreateRequest request);
+    // Упрощенный метод создания entity
+    default Application toEntity(ApplicationCreateRequest request) {
+        Application application = new Application();
+        application.setClientId(request.getClientId());
+        // Остальные поля устанавливаются в сервисе
+        return application;
+    }
 
     default Boolean isApplicationActive(Application application) {
         if (application.getStatus() == null) {

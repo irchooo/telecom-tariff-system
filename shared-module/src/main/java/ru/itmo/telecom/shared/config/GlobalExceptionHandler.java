@@ -1,5 +1,6 @@
 package ru.itmo.telecom.shared.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
  * Будет перехватывать исключения из всех контроллеров,
  * которые импортируют этот shared-module.
  */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -44,13 +46,12 @@ public class GlobalExceptionHandler {
 
     /**
      * Обработка всех остальных непредвиденных исключений
-     * (более стандартный подход, чем в образце [cite: 243, 244]).
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ErrorDto handleAllOtherExceptions(Exception ex) {
-        // ВАЖНО: В реальном проекте здесь обязательно должно быть логирование
-        // log.error("Unhandled exception occurred: ", ex);
+        log.error("Unhandled exception occurred: ", ex);
         return new ErrorDto("Произошла внутренняя ошибка сервера. Пожалуйста, обратитесь в поддержку.");
     }
+
 }

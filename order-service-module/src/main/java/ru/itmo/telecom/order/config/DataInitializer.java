@@ -7,6 +7,7 @@ import ru.itmo.telecom.order.entity.ApplicationStatus;
 import ru.itmo.telecom.order.repository.ApplicationStatusRepository;
 import ru.itmo.telecom.shared.utils.TelecomConstants;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -17,26 +18,36 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // --- Инициализация Статусов Заявок ---
+        System.out.println("=== Starting Order Service Data Initialization ===");
+
+        // Инициализация статусов заявок
         if (statusRepository.count() == 0) {
-            ApplicationStatus created = new ApplicationStatus();
-            created.setName(TelecomConstants.APP_STATUS_CREATED);
-            created.setDescription("Заявка создана пользователем, ожидает обработки.");
+            System.out.println("Initializing application statuses...");
 
-            ApplicationStatus inProgress = new ApplicationStatus();
-            inProgress.setName(TelecomConstants.APP_STATUS_IN_PROGRESS);
-            inProgress.setDescription("Заявка принята в работу оператором.");
+            List<ApplicationStatus> statuses = Arrays.asList(
+                    createStatus(TelecomConstants.APP_STATUS_CREATED, "Заявка создана пользователем, ожидает обработки"),
+                    createStatus(TelecomConstants.APP_STATUS_IN_PROGRESS, "Заявка принята в работу оператором"),
+                    createStatus(TelecomConstants.APP_STATUS_REQUIRES_CLARIFICATION, "Требуется уточнение данных"),
+                    createStatus(TelecomConstants.APP_STATUS_CONFIRMED, "Данные клиента проверены и одобрены"),
+                    createStatus(TelecomConstants.APP_STATUS_CONNECTING, "Технический отдел производит настройку"),
+                    createStatus(TelecomConstants.APP_STATUS_COMPLETED, "Услуга активирована, заявка выполнена"),
+                    createStatus(TelecomConstants.APP_STATUS_REJECTED, "Заявка отклонена")
+            );
 
-            ApplicationStatus completed = new ApplicationStatus();
-            completed.setName(TelecomConstants.APP_STATUS_COMPLETED);
-            completed.setDescription("Услуга успешно подключена.");
-
-            ApplicationStatus cancelled = new ApplicationStatus();
-            cancelled.setName(TelecomConstants.APP_STATUS_REJECTED);
-            cancelled.setDescription("Заявка отменена клиентом или оператором.");
-
-            List<ApplicationStatus> statuses = List.of(created, inProgress, completed, cancelled);
             statusRepository.saveAll(statuses);
+            System.out.println("Application statuses initialized: " + statuses.size());
+        } else {
+            System.out.println("Application statuses already exist: " + statusRepository.count());
         }
+
+        System.out.println("=== Order Service Data Initialization Complete ===");
+    }
+
+    private ApplicationStatus createStatus(String name, String description) {
+        ApplicationStatus status = new ApplicationStatus();
+        status.setName(name);
+        status.setDescription(description);
+        status.setIsActive(true);
+        return status;
     }
 }
