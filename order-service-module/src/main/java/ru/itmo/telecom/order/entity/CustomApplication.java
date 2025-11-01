@@ -14,17 +14,13 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CustomApplication {
 
-    // ID - это одновременно первичный ключ и внешний ключ к applications
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Добавьте авто-генерацию ID
     private Integer id;
 
     // Ссылка на родительскую заявку (One-to-One)
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "application_id")
+    @JoinColumn(name = "application_id", unique = true, nullable = false)
     private Application application;
 
-    // Здесь можно добавить дополнительные поля, специфичные для конструктора,
-    // например, итоговая скидка по промокоду или тип конструктора.
-    // Пока оставим пустым.
 }

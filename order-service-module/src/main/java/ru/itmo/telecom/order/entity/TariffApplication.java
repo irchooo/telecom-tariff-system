@@ -1,13 +1,6 @@
 package ru.itmo.telecom.order.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -23,12 +16,12 @@ public class TariffApplication {
 
     // ID - это одновременно первичный ключ и внешний ключ к applications
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Добавьте авто-генерацию ID
     private Integer id;
 
     // Ссылка на родительскую заявку (One-to-One)
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId // Указывает, что ID этого объекта будет использоваться как FK
-    @JoinColumn(name = "application_id")
+    @JoinColumn(name = "application_id", unique = true, nullable = false)
     private Application application;
 
     // ID тарифа из tariff-module (внешний сервис)

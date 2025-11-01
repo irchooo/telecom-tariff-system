@@ -1,0 +1,27 @@
+server:
+  port: 8083
+
+# Конфигурация Telegram-бота
+telegram:
+  bot:
+    username: "@TariffWizardBot"
+    token: "8405448571:AAGsW5Cs-1x1W2EeqSrGvMFyAzEJiCyS-3Q"
+
+# Адреса наших внутренних API
+services:
+  user: "http://localhost:8080/api/v1/users"
+  tariff: "http://localhost:8081/api/v1/tariffs"
+  order: "http://localhost:8082/api/v1/orders"
+
+spring:
+  application:
+    name: notification-service
+  main:
+    allow-bean-definition-overriding: true
+
+logging:
+  level:
+    ru.itmo.telecom: DEBUG
+    org.telegram: DEBUG
+    org.springframework.web.client: DEBUG
+    org.hibernate: ERROR

@@ -1,13 +1,6 @@
 package ru.itmo.telecom.order.entity;
 
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -28,13 +21,9 @@ public class ApplicationDetail {
 
     // Внешний ключ: Ссылка на заявку
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("applicationId")
+    @MapsId("applicationId") // Это связывает с полем applicationId в составном ключе
     @JoinColumn(name = "application_id", nullable = false)
     private Application application;
-
-    // Ссылка на параметр услуги (из tariff-module, храним ID)
-    @Column(name = "parameter_id", nullable = false)
-    private Integer parameterId;
 
     @Column(nullable = false)
     private Integer volume; // Количество единиц услуги

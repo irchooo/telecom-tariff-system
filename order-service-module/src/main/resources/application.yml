@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create # Автоматически создаем таблицы заказов
+      ddl-auto: create-drop # Автоматически создаем таблицы заказов
     show-sql: true
     properties:
       hibernate:
@@ -21,3 +21,9 @@ spring:
         # Используем ту же стратегию именования, что и в tariff-module
         naming:
           physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+
+logging:
+  level:
+    ru.itmo.telecom: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.springframework.web: DEBUG
