@@ -8,6 +8,7 @@ import ru.itmo.telecom.shared.order.dto.ApplicationCreateRequest;
 import ru.itmo.telecom.shared.order.dto.ApplicationDetailRequest;
 import ru.itmo.telecom.shared.order.dto.ApplicationDto;
 import ru.itmo.telecom.shared.tariff.dto.ServiceParameterDto;
+import ru.itmo.telecom.shared.tariff.dto.TariffDetailDto;
 import ru.itmo.telecom.shared.tariff.dto.TariffDto;
 import ru.itmo.telecom.shared.user.dto.ClientDto;
 import ru.itmo.telecom.shared.user.dto.ClientRegistrationDto;
@@ -145,7 +146,7 @@ public class BotService {
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 userSessions.remove(chatId); // Очищаем сессию
-                return "Вы успешно зарегистрированы!\\n\\nДоступные команды:\\n/tariffs - Готовые тарифы\\n/constructor - Создать свой тариф\\n/cancel - Отмена текущего действия";
+                return "Вы успешно зарегистрированы!\n\nДоступные команды:\n/tariffs - Готовые тарифы\n/constructor - Создать свой тариф\n/cancel - Отмена текущего действия";
             } else {
                 log.warn("Registration failed with status: {}", response.getStatusCode());
                 return "Ошибка при регистрации. Сервер вернул статус: " + response.getStatusCode();
@@ -254,7 +255,7 @@ public class BotService {
                 userSessions.remove(chatId);
 
                 String successMessage = String.format(
-                        "✅ Ваш тариф: %dГБ + %d минут + %d SMS\\n\\n💰 Стоимость: %.2f руб/мес\\n\\n📋 Заявка №%d создана!\\n\\nНаш менеджер свяжется с вами в течение 24 часов для подтверждения заказа.",
+                        "✅ Ваш тариф: %dГБ + %d минут + %d SMS\n\n💰 Стоимость: %.2f руб/мес\n\n📋 Заявка №%d создана!\n\nНаш менеджер свяжется с вами в течение 24 часов для подтверждения заказа.",
                         session.getInternetGb(), session.getMinutes(), session.getSms(),
                         application.getTotalCost(), application.getId()
                 );
@@ -279,9 +280,31 @@ public class BotService {
                 StringBuilder sb = new StringBuilder("📊 Доступные тарифы:\n\n");
 
                 for (TariffDto tariff : response.getBody()) {
-                    sb.append(String.format("🏷️ %s\n%s\n\n",
-                            tariff.getName(),
-                            tariff.getDescription() != null ? tariff.getDescription() : ""));
+                    sb.append("🏷️ ").append(tariff.getName()).append("\n")
+                            .append("📝 ").append(tariff.getDescription()).append("\n");
+
+                    // Добавляем состав тарифа если есть детали
+                    if (tariff.getDetails() != null && !tariff.getDetails().isEmpty()) {
+                        sb.append("📦 Состав:\n");
+                        for (TariffDetailDto detail : tariff.getDetails()) {
+                            sb.append("   • ").append(detail.getVolume())
+                                    .append(" ").append(detail.getParameter().getUnit())
+                                    .append(" ").append(detail.getParameter().getName())
+                                    .append("\n");
+                        }
+
+                        // Рассчитываем и показываем стоимость
+                        BigDecimal totalCost = BigDecimal.ZERO;
+                        for (TariffDetailDto detail : tariff.getDetails()) {
+                            BigDecimal detailCost = detail.getParameter().getMaxPricePerUnit()
+                                    .multiply(detail.getPriceCoefficient())
+                                    .multiply(BigDecimal.valueOf(detail.getVolume()));
+                            totalCost = totalCost.add(detailCost);
+                        }
+                        sb.append("💰 Стоимость: ").append(totalCost).append(" руб/мес\n");
+                    }
+
+                    sb.append("\n");
                 }
 
                 sb.append("Для заказа тарифа используйте /constructor");
